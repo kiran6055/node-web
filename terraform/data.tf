@@ -24,3 +24,8 @@ data "aws_iam_policy_document" "rds_secret" {
 
 }
 
+
+
+data "aws_ssm_parameter" "rds_secret_arn" {
+  name = "/timing/vpc/rds_secret_arn"
+}
