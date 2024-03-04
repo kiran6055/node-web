@@ -1,33 +1,51 @@
 var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-
-var routes = require('./routes/index');
-
 var app = express();
+var uuid = require('node-uuid');
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+var pg = require('pg');
+const conString = {
+    user: process.env.DBUSER,
+    database: process.env.DB,
+    password: process.env.DBPASS,
+    host: process.env.DBHOST,
+    port: process.env.DBPORT                
+};
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+// Routes
+app.get('/api/status', function(req, res) {
+//'SELECT now() as time', [], function(err, result
+  
+  const Pool = require('pg').Pool
+  const pool = new Pool(conString)
+  // connection using created pool
+  pool.connect((err, client, release) => {
+    if (err) {
+      return console.error('Error acquiring client', err.stack)
+    }
+    client.query('SELECT now() as time', (err, result) => {
+      release()
+    if (err) {
+      console.log(err);
+      return console.error('Error executing query', err.stack)
+    }
+    res.status(200).send(result.rows);
+  });
+});
 
-app.use('/', routes);
+  // pool shutdown
+  pool.end()
+});
+
+app.get('/health', function(req, res)  {
+  res.status(200).send('Ok');
+});
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
 
 // error handlers
@@ -35,24 +53,25 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render({
-            message: err.message,
-            error: err
-        });
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.json({
+      message: err.message,
+      error: err
     });
+  });
 }
 
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render({
-        message: err.message,
-        error: {}
-    });
+  res.status(err.status || 500);
+  res.json({
+    message: err.message,
+    error: {}
+  });
 });
 
 
 module.exports = app;
+
