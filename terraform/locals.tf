@@ -15,10 +15,10 @@ locals {
   ecs_cluster_id            = data.aws_ssm_parameter.ecs_cluster_id.value 
   private_subnet_ids        = split(",",data.aws_ssm_parameter.private_subnet_ids.value)
   container_name	    = "app-ecs"
-  target_group_arns         = data.aws_ssm_parameter.target_group_arns.value
+  target_group_arn          = data.aws_ssm_parameter.target_group_arn.value
 
   target_group = {
-     arn = local.target_group_arns
+     arn = local.target_group_arn
     # Add any other properties you need for the target_group
   }
 

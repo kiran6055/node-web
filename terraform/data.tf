@@ -66,8 +66,8 @@ data "aws_ssm_parameter" "private_subnet_ids" {
 
 
 
-data "aws_ssm_parameter" "target_group_arns" {
-  name = "/timing/vpc/target_group_arns"
+data "aws_ssm_parameter" "target_group_arn" {
+  name = "/timing/vpc/target_group_arn"
 }
 
 
